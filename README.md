@@ -30,7 +30,7 @@ Hiện tại dự án là Chrome Extension thuần, không cần cài `npm`, kh�
 2. Bật `Developer mode` hoặc `Chế độ nhà phát triển` ở góc phải phía trên.
 3. Chọn `Load unpacked` hoặc `Tải tiện ích đã giải nén`.
 4. Chọn thư mục chứa dự án này, tức thư mục có file `manifest.json`.
-5. Sau khi cài xong, ghim tiện ích `LMS Video Status Checker` lên thanh công cụ nếu muốn sử dụng nhanh.
+5. Sau khi cài xong, ghim tiện ích `LMS Assistant` lên thanh công cụ nếu muốn sử dụng nhanh.
 
 ## Cách sử dụng
 
@@ -84,7 +84,7 @@ Hiện tại dự án là Chrome Extension thuần, không cần cài `npm`, kh�
 ## Gỡ cài đặt
 
 1. Mở `chrome://extensions/`.
-2. Tìm tiện ích `LMS Video Status Checker`.
+2. Tìm tiện ích `LMS Assistant`.
 3. Chọn `Remove` hoặc `Xóa`.
 
 ## Miễn trừ trách nhiệm
