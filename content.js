@@ -183,15 +183,17 @@
       || "Bài học chưa có tên";
   }
 
-  function isReviewQuestionLesson(title) {
-    return /câu\s*hỏi\s*ôn\s*tập\s*chương/i.test(title);
-  }
-
   function findButtonByText(text) {
     const normalizedText = text.trim().toLowerCase();
 
     return Array.from(document.querySelectorAll("button"))
       .find((button) => button.textContent?.trim().toLowerCase() === normalizedText) || null;
+  }
+
+  function findQuizElement() {
+    return findButtonByText("Bắt đầu làm bài")
+      || findButtonByText("Nộp bài")
+      || document.querySelector('[data-quiz-scroll="true"], [role="radiogroup"], input[type="radio"][name^="quiz-"]');
   }
 
   async function openLesson(lesson) {
@@ -209,14 +211,14 @@
     await sleep(1800);
   }
 
-  async function waitForButtonByText(text, timeoutMs = 10000) {
+  async function waitForQuizElement(timeoutMs = 2500) {
     const startedAt = Date.now();
 
     while (Date.now() - startedAt < timeoutMs) {
-      const button = findButtonByText(text);
+      const quizElement = findQuizElement();
 
-      if (button && !button.disabled && button.getAttribute("aria-disabled") !== "true") return button;
-      await sleep(300);
+      if (quizElement) return quizElement;
+      await sleep(250);
     }
 
     return null;
@@ -365,22 +367,15 @@
       return window[STUDY_STATE_KEY];
     }
 
-    if (isReviewQuestionLesson(lesson.title)) {
-      await openLesson(lesson);
+    await openLesson(lesson);
 
-      const startQuizButton = await waitForButtonByText("Bắt đầu làm bài");
+    const quizElement = await waitForQuizElement();
 
-      if (startQuizButton) {
-        startQuizButton.scrollIntoView({ block: "center", behavior: "smooth" });
-        stopAutomation(`Đã đến bước Bắt đầu làm bài. Tạm dừng để xử lý thủ công: ${lesson.title}`);
-      } else {
-        stopAutomation(`Tạm dừng tại bài cần test thủ công: ${lesson.title}. Không tìm thấy nút Bắt đầu làm bài.`);
-      }
-
+    if (quizElement) {
+      quizElement.scrollIntoView({ block: "center", behavior: "smooth" });
+      stopAutomation(`Đã phát hiện bài quiz. Tạm dừng để xử lý thủ công: ${lesson.title}`);
       return window[STUDY_STATE_KEY];
     }
-
-    await openLesson(lesson);
 
     currentLessonId = lesson.id;
 

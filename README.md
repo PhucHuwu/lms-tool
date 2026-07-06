@@ -12,7 +12,7 @@ LMS Assistant là tiện ích mở rộng cho Google Chrome hỗ trợ tự đ�
 - Tự động chuyển sang bài tiếp theo sau khi video kết thúc và LMS đã cập nhật tiến độ.
 - Tự mở các mục/chương chưa hoàn thành nếu danh sách bài học đang bị thu gọn.
 - Giữ màn hình không ngủ trong lúc chạy hỗ trợ phát bài học.
-- Tạm dừng tại các bài dạng `Câu hỏi ôn tập chương` để người dùng xử lý thủ công.
+- Tạm dừng khi phát hiện nội dung quiz để người dùng xử lý thủ công.
 - Giả lập trạng thái trang luôn hiển thị để hạn chế việc video bị dừng khi chuyển tab hoặc mất focus.
 
 ## Yêu cầu
@@ -54,7 +54,7 @@ Hiện tại dự án là Chrome Extension thuần, không cần cài `npm`, kh�
 
 - Tiện ích chỉ chạy trên domain `https://lms.ptit.edu.vn/*`.
 - Nếu Chrome chặn tự động phát, hãy bấm Play trực tiếp trên video một lần rồi chạy lại tiện ích.
-- Với bài `Câu hỏi ôn tập chương`, tiện ích sẽ dừng lại để bạn làm thủ công.
+- Với bài có nội dung quiz như nút `Bắt đầu làm bài`, nút `Nộp bài`, `radiogroup` hoặc radio quiz, tiện ích sẽ dừng lại để bạn làm thủ công.
 - Tốc độ phát phụ thuộc vào trình phát video/LMS. Nếu không đặt được `4x`, tiện ích sẽ thử `2x`; nếu vẫn không được sẽ dùng tốc độ hiện tại.
 - Không nên đóng tab LMS trong lúc tiện ích đang chạy.
 - Khi cập nhật mã nguồn tiện ích, hãy vào `chrome://extensions/` và bấm reload tiện ích để áp dụng thay đổi.
