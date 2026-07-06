@@ -1,46 +1,47 @@
 # LMS Video Status Checker
 
-Extension Chrome Manifest V3 de kiem tra trang thai phat video Plyr tren `https://lms.ptit.edu.vn/*`.
+Extension Chrome Manifest V3 để kiểm tra trạng thái phát video Plyr trên `https://lms.ptit.edu.vn/*`.
 
-## Cai dat
+## Cài đặt
 
-1. Mo Chrome va truy cap `chrome://extensions/`.
-2. Bat `Developer mode`.
-3. Chon `Load unpacked`.
-4. Chon thu muc `D:\Project\Git\lms-tool`.
-5. Mo bai hoc tren LMS, bam icon extension de xem trang thai video.
+1. Mở Chrome và truy cập `chrome://extensions/`.
+2. Bật `Developer mode`.
+3. Chọn `Load unpacked`.
+4. Chọn thư mục `D:\Project\Git\lms-tool`.
+5. Mở bài học trên LMS, bấm icon extension để xem trạng thái video.
 
-## Trang thai co the doc
+## Trạng thái có thể đọc
 
-- Dang phat, tam dung, da phat xong.
-- Thoi gian hien tai va tong thoi luong.
-- Phan tram tien do.
-- Toc do phat.
-- Am luong hoac tat tieng.
+- Đang phát, tạm dừng, đã phát xong.
+- Thời gian hiện tại và tổng thời lượng.
+- Phần trăm tiến độ.
+- Tốc độ phát.
+- Âm lượng hoặc tắt tiếng.
 
-## Kich ban kiem thu UI
+## Kịch Bản Kiểm Thử UI
 
-Nut `Bat dau hoc` trong popup se chay kich ban kiem thu tren UI hien tai:
+Nút `Bắt đầu học` trong popup sẽ chạy kịch bản kiểm thử trên UI hiện tại:
 
-- Tim bai hoc dau tien chua duoc tick trong sidebar.
-- Bo qua bai bi khoa voi `aria-disabled="true"`.
-- Mo bai do neu bai chua active.
-- Dat toc do video thanh `4x` neu trinh phat cho phep.
-- Phat video sau thao tac bam nut cua nguoi dung.
-- Khi video ket thuc, cho LMS cap nhat tien do roi chuyen sang bai chua xem tiep theo.
-- Dung khi het bai co the mo, khi Chrome chan phat video, hoac khi bam `Dung`.
+- Tìm bài học đầu tiên chưa được tick trong sidebar.
+- Bỏ qua bài bị khóa với `aria-disabled="true"`.
+- Mở bài đó nếu bài chưa active.
+- Đặt tốc độ video thành `4x` nếu trình phát cho phép.
+- Phát video sau thao tác bấm nút của người dùng.
+- Khi video kết thúc, chờ LMS cập nhật tiến độ rồi chuyển sang bài chưa xem tiếp theo.
+- Dừng khi hết bài có thể mở, khi Chrome chặn phát video, hoặc khi bấm `Dừng`.
+- Tạm dừng khi gặp bài có tiêu đề `Câu hỏi ôn tập chương` để người kiểm thử làm thủ công.
 
-Extension chi thao tac qua DOM/UI tren tab hien tai, khong goi API rieng va khong sua trang thai tien do truc tiep.
+Extension chỉ thao tác qua DOM/UI trên tab hiện tại, không gọi API riêng và không sửa trạng thái tiến độ trực tiếp.
 
-## Cach lay trang thai bang code
+## Cách Lấy Trạng Thái Bằng Code
 
-Tu popup, extension gui message `GET_LMS_VIDEO_STATUS` den content script de lay trang thai hien tai. Content script cung gan co nhanh tren HTML root:
+Từ popup, extension gửi message `GET_LMS_VIDEO_STATUS` đến content script để lấy trạng thái hiện tại. Content script cũng gắn cờ nhanh trên HTML root:
 
 ```html
 <html data-lms-video-playing="true">
 ```
 
-Moi lan trang thai thay doi, content script phat event:
+Mỗi lần trạng thái thay đổi, content script phát event:
 
 ```js
 window.addEventListener("lms-video-status", (event) => {

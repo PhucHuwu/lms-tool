@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "LMS Video Status Checker",
   "version": "1.0.0",
-  "description": "Theo doi trang thai phat video Plyr tren lms.ptit.edu.vn.",
+  "description": "Theo dõi trạng thái phát video Plyr trên lms.ptit.edu.vn.",
   "permissions": ["activeTab", "scripting"],
   "host_permissions": ["https://lms.ptit.edu.vn/*"],
   "content_scripts": [

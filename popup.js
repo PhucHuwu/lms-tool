@@ -23,38 +23,38 @@ function renderMissing(message) {
 
 function renderStatus(status) {
   if (!status?.found) {
-    renderMissing("Khong tim thay video tren tab hien tai");
+    renderMissing("Không tìm thấy video trên tab hiện tại");
     return;
   }
 
   if (status.ended) {
     setStatusClass("paused");
-    statusEl.textContent = "Da phat xong";
+    statusEl.textContent = "Đã phát xong";
   } else if (status.playing) {
     setStatusClass("playing");
-    statusEl.textContent = "Dang phat";
+    statusEl.textContent = "Đang phát";
   } else {
     setStatusClass("paused");
-    statusEl.textContent = "Dang tam dung";
+    statusEl.textContent = "Đang tạm dừng";
   }
 
   timeEl.textContent = `${status.currentTimeText} / ${status.durationText}`;
   progressEl.textContent = `${status.progress.toFixed(1)}%`;
   speedEl.textContent = status.speedText || `${status.playbackRate}x`;
-  volumeEl.textContent = status.muted ? "Tat tieng" : `${Math.round(status.volume * 100)}%`;
+  volumeEl.textContent = status.muted ? "Tắt tiếng" : `${Math.round(status.volume * 100)}%`;
 }
 
 async function checkStatus() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
   if (!tab?.id || !tab.url?.startsWith("https://lms.ptit.edu.vn/")) {
-    renderMissing("Hay mo trang lms.ptit.edu.vn");
+    renderMissing("Hãy mở trang lms.ptit.edu.vn");
     return;
   }
 
   chrome.tabs.sendMessage(tab.id, { type: "GET_LMS_VIDEO_STATUS" }, (response) => {
     if (chrome.runtime.lastError) {
-      renderMissing("Tai lai trang LMS roi thu lai");
+      renderMissing("Tải lại trang LMS rồi thử lại");
       return;
     }
 
@@ -66,25 +66,25 @@ async function startStudy() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
   if (!tab?.id || !tab.url?.startsWith("https://lms.ptit.edu.vn/")) {
-    renderMissing("Hay mo trang lms.ptit.edu.vn");
+    renderMissing("Hãy mở trang lms.ptit.edu.vn");
     return;
   }
 
   startButton.disabled = true;
-  studyStatusEl.textContent = "Dang chay kich ban kiem thu...";
+  studyStatusEl.textContent = "Đang chạy kịch bản kiểm thử...";
 
   chrome.tabs.sendMessage(tab.id, { type: "START_LMS_STUDY_AUTOMATION" }, (response) => {
     startButton.disabled = Boolean(response?.running);
 
     if (chrome.runtime.lastError) {
       startButton.disabled = false;
-      studyStatusEl.textContent = "Tai lai trang LMS roi thu lai.";
+      studyStatusEl.textContent = "Tải lại trang LMS rồi thử lại.";
       return;
     }
 
     studyStatusEl.textContent = response?.lessonTitle
-      ? `${response.message} Bai: ${response.lessonTitle}`
-      : response?.message || "Khong co phan hoi tu trang LMS.";
+      ? `${response.message} Bài: ${response.lessonTitle}`
+      : response?.message || "Không có phản hồi từ trang LMS.";
 
     checkStatus();
   });
@@ -94,7 +94,7 @@ async function stopStudy() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
   if (!tab?.id || !tab.url?.startsWith("https://lms.ptit.edu.vn/")) {
-    renderMissing("Hay mo trang lms.ptit.edu.vn");
+    renderMissing("Hãy mở trang lms.ptit.edu.vn");
     return;
   }
 
@@ -102,11 +102,11 @@ async function stopStudy() {
     startButton.disabled = false;
 
     if (chrome.runtime.lastError) {
-      studyStatusEl.textContent = "Tai lai trang LMS roi thu lai.";
+      studyStatusEl.textContent = "Tải lại trang LMS rồi thử lại.";
       return;
     }
 
-    studyStatusEl.textContent = response?.message || "Da dung kich ban kiem thu.";
+    studyStatusEl.textContent = response?.message || "Đã dừng kịch bản kiểm thử.";
     checkStatus();
   });
 }

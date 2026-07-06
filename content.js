@@ -146,7 +146,11 @@
     return lesson.querySelector("[title]")?.getAttribute("title")?.trim()
       || lesson.textContent?.trim()?.replace(/\s+/g, " ")
       || lesson.getAttribute("data-lesson-id")
-      || "Bai hoc chua co ten";
+      || "Bài học chưa có tên";
+  }
+
+  function isReviewQuestionLesson(title) {
+    return /câu\s*hỏi\s*ôn\s*tập\s*chương/i.test(title);
   }
 
   function findFirstUnwatchedLesson(excludeLessonId = "") {
@@ -203,7 +207,7 @@
     const video = document.querySelector(".lesson-video-styles__VideoContainer-sc-f73a8977-0 video, .plyr video, video");
 
     if (!video) {
-      return { ok: false, message: "Da mo bai hoc, nhung chua tim thay video." };
+      return { ok: false, message: "Đã mở bài học, nhưng chưa tìm thấy video." };
     }
 
     attachVideo(video);
@@ -214,7 +218,7 @@
     } catch (_error) {
       return {
         ok: false,
-        message: "Chrome chan tu dong phat. Hay bam Play tren video.",
+        message: "Chrome chặn tự động phát. Hãy bấm Play trên video.",
         speedSet
       };
     }
@@ -222,7 +226,7 @@
     updateStatus();
     return {
       ok: true,
-      message: speedSet ? "Dang phat video voi toc do 4x." : "Dang phat video, nhung khong dat duoc toc do 4x.",
+      message: speedSet ? "Đang phát video với tốc độ 4x." : "Đang phát video, nhưng không đặt được tốc độ 4x.",
       speedSet
     };
   }
@@ -252,7 +256,13 @@
     }
 
     if (!lesson) {
-      stopAutomation("Da hoan tat kich ban hoac khong con bai chua xem co the mo.");
+      stopAutomation("Đã hoàn tất kịch bản hoặc không còn bài chưa xem có thể mở.");
+      return window[STUDY_STATE_KEY];
+    }
+
+    if (isReviewQuestionLesson(lesson.title)) {
+      lesson.element.scrollIntoView({ block: "center", behavior: "smooth" });
+      stopAutomation(`Tạm dừng tại bài cần test thủ công: ${lesson.title}`);
       return window[STUDY_STATE_KEY];
     }
 
@@ -261,7 +271,7 @@
       lesson.element.click();
       saveStudyStatus({
         running: automationRunning,
-        message: `Dang mo bai: ${lesson.title}`,
+        message: `Đang mở bài: ${lesson.title}`,
         lessonTitle: lesson.title,
         checkedAt: new Date().toISOString()
       });
@@ -299,7 +309,7 @@
 
     saveStudyStatus({
       running: true,
-      message: "Video da ket thuc. Dang cho LMS cap nhat tien do...",
+      message: "Video đã kết thúc. Đang chờ LMS cập nhật tiến độ...",
       checkedAt: new Date().toISOString()
     });
 
@@ -322,13 +332,13 @@
     }
 
     if (message?.type === "STOP_LMS_STUDY_AUTOMATION") {
-      stopAutomation("Da dung kich ban kiem thu.");
+      stopAutomation("Đã dừng kịch bản kiểm thử.");
       sendResponse(window[STUDY_STATE_KEY]);
       return true;
     }
 
     if (message?.type === "GET_LMS_STUDY_STATUS") {
-      sendResponse(window[STUDY_STATE_KEY] || { running: false, message: "Chua bat dau", checkedAt: new Date().toISOString() });
+      sendResponse(window[STUDY_STATE_KEY] || { running: false, message: "Chưa bắt đầu", checkedAt: new Date().toISOString() });
       return true;
     }
 
