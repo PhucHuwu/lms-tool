@@ -203,6 +203,23 @@
     return video.playbackRate === rate;
   }
 
+  function setPreferredPlaybackRate(video) {
+    if (setPlaybackRate(video, 4)) return 4;
+    if (setPlaybackRate(video, 2)) return 2;
+    return video.playbackRate;
+  }
+
+  function muteVideo(video) {
+    try {
+      video.muted = true;
+      video.volume = 0;
+    } catch (_error) {
+      return false;
+    }
+
+    return video.muted && video.volume === 0;
+  }
+
   async function startCurrentVideo() {
     const video = document.querySelector(".lesson-video-styles__VideoContainer-sc-f73a8977-0 video, .plyr video, video");
 
@@ -211,7 +228,8 @@
     }
 
     attachVideo(video);
-    const speedSet = setPlaybackRate(video, 4);
+    const playbackRate = setPreferredPlaybackRate(video);
+    const muted = muteVideo(video);
 
     try {
       await video.play();
@@ -219,15 +237,21 @@
       return {
         ok: false,
         message: "Chrome chặn tự động phát. Hãy bấm Play trên video.",
-        speedSet
+        playbackRate,
+        muted
       };
     }
 
     updateStatus();
     return {
       ok: true,
-      message: speedSet ? "Đang phát video với tốc độ 4x." : "Đang phát video, nhưng không đặt được tốc độ 4x.",
-      speedSet
+      message: playbackRate === 4
+        ? "Đang phát video với tốc độ 4x."
+        : playbackRate === 2
+          ? "Không đặt được 4x, đang phát video với tốc độ 2x."
+          : `Không đặt được 4x hoặc 2x, đang phát với tốc độ ${playbackRate}x.`,
+      playbackRate,
+      muted
     };
   }
 
