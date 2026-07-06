@@ -25,6 +25,7 @@ Nút `Bắt đầu học` trong popup sẽ chạy kịch bản kiểm thử trê
 - Tìm bài học đầu tiên chưa được tick trong sidebar.
 - Bỏ qua bài bị khóa với `aria-disabled="true"`.
 - Mở bài đó nếu bài chưa active.
+- Tìm video trực tiếp trong trang hoặc trong iframe H5P có thể truy cập được.
 - Đặt tốc độ video thành `4x` nếu trình phát cho phép; nếu không được thì tự chuyển sang `2x`.
 - Tắt tiếng video và đặt âm lượng về `0%` để tránh ồn trong lúc kiểm thử.
 - Phát video sau thao tác bấm nút của người dùng.

@@ -22,6 +22,36 @@
     return video.closest(".plyr");
   }
 
+  function findVideoInDocument(rootDocument) {
+    return rootDocument.querySelector(".lesson-video-styles__VideoContainer-sc-f73a8977-0 video, .plyr video, video");
+  }
+
+  function getAccessibleFrameDocument(frame) {
+    try {
+      return frame.contentDocument || frame.contentWindow?.document || null;
+    } catch (_error) {
+      return null;
+    }
+  }
+
+  function findVideoInFrames(rootDocument) {
+    const frames = Array.from(rootDocument.querySelectorAll("iframe"));
+
+    for (const frame of frames) {
+      const frameDocument = getAccessibleFrameDocument(frame);
+      if (!frameDocument) continue;
+
+      const video = findVideoElement(frameDocument);
+      if (video) return video;
+    }
+
+    return null;
+  }
+
+  function findVideoElement(rootDocument = document) {
+    return findVideoInDocument(rootDocument) || findVideoInFrames(rootDocument);
+  }
+
   function getVideoStatus(video) {
     const plyrRoot = getPlyrRoot(video);
     const seek = plyrRoot?.querySelector('input[data-plyr="seek"]');
@@ -90,7 +120,7 @@
   }
 
   function updateStatus() {
-    const video = document.querySelector(".lesson-video-styles__VideoContainer-sc-f73a8977-0 video, .plyr video, video") || observedVideo;
+    const video = findVideoElement() || observedVideo;
 
     if (!video) {
       saveStatus({ found: false, checkedAt: new Date().toISOString() });
@@ -221,7 +251,7 @@
   }
 
   async function startCurrentVideo() {
-    const video = document.querySelector(".lesson-video-styles__VideoContainer-sc-f73a8977-0 video, .plyr video, video");
+    const video = await waitForVideoElement();
 
     if (!video) {
       return { ok: false, message: "Đã mở bài học, nhưng chưa tìm thấy video." };
@@ -257,6 +287,18 @@
 
   function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  async function waitForVideoElement(timeoutMs = 12000) {
+    const startedAt = Date.now();
+
+    while (Date.now() - startedAt < timeoutMs) {
+      const video = findVideoElement();
+      if (video) return video;
+      await sleep(300);
+    }
+
+    return null;
   }
 
   async function waitForLessonChecked(lessonId, timeoutMs = 15000) {
