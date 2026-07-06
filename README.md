@@ -32,8 +32,22 @@ Nút `Bắt đầu học` trong popup sẽ chạy kịch bản kiểm thử trê
 - Khi video kết thúc, chờ LMS cập nhật tiến độ rồi chuyển sang bài chưa xem tiếp theo.
 - Dừng khi hết bài có thể mở, khi Chrome chặn phát video, hoặc khi bấm `Dừng`.
 - Tạm dừng khi gặp bài có tiêu đề `Câu hỏi ôn tập chương` để người kiểm thử làm thủ công.
+- Giữ máy/màn hình thức trong lúc chạy bằng `chrome.power.requestKeepAwake("display")` để giảm khả năng video bị dừng do hệ thống sleep.
+- Chạy `visibility-override.js` ở `document_start` trong main world và iframe để giảm trường hợp player tự pause khi tab/cửa sổ bị ẩn.
 
 Extension chỉ thao tác qua DOM/UI trên tab hiện tại, không gọi API riêng và không sửa trạng thái tiến độ trực tiếp.
+
+## Giới Hạn Khi Tab Chạy Nền
+
+Chrome có thể throttle timer, renderer, iframe hoặc media khi tab không active hoặc khi cửa sổ bị minimize. Extension đã override Page Visibility API ở mức trang, nhưng không thể đảm bảo ép video tiếp tục chạy trong mọi trường hợp nếu chính Chrome suspend renderer khi minimize.
+
+Khi cần kiểm thử background có kiểm soát, hãy chạy bằng Chrome test profile riêng với các flag phù hợp, ví dụ:
+
+```powershell
+chrome.exe --user-data-dir="C:\Temp\lms-test-profile" --disable-background-timer-throttling --disable-renderer-backgrounding --disable-backgrounding-occluded-windows --autoplay-policy=no-user-gesture-required
+```
+
+Trong kiểm thử ổn định nhất, nên để tab LMS là tab active trong một cửa sổ Chrome riêng.
 
 ## Cách Lấy Trạng Thái Bằng Code
 

@@ -38,8 +38,10 @@ function renderStatus(status) {
     statusEl.textContent = "Đang tạm dừng";
   }
 
-  timeEl.textContent = `${status.currentTimeText} / ${status.durationText}`;
-  progressEl.textContent = `${status.progress.toFixed(1)}%`;
+  const progress = Number.isFinite(status.progress) ? status.progress : 0;
+
+  timeEl.textContent = `${status.currentTimeText || "00:00"} / ${status.durationText || "00:00"}`;
+  progressEl.textContent = `${progress.toFixed(1)}%`;
   speedEl.textContent = status.speedText || `${status.playbackRate}x`;
   volumeEl.textContent = status.muted ? "Tắt tiếng" : `${Math.round(status.volume * 100)}%`;
 }
@@ -72,6 +74,7 @@ async function startStudy() {
 
   startButton.disabled = true;
   studyStatusEl.textContent = "Đang chạy kịch bản kiểm thử...";
+  chrome.runtime.sendMessage({ type: "REQUEST_KEEP_AWAKE" });
 
   chrome.tabs.sendMessage(tab.id, { type: "START_LMS_STUDY_AUTOMATION" }, (response) => {
     startButton.disabled = Boolean(response?.running);
@@ -100,6 +103,7 @@ async function stopStudy() {
 
   chrome.tabs.sendMessage(tab.id, { type: "STOP_LMS_STUDY_AUTOMATION" }, (response) => {
     startButton.disabled = false;
+    chrome.runtime.sendMessage({ type: "RELEASE_KEEP_AWAKE" });
 
     if (chrome.runtime.lastError) {
       studyStatusEl.textContent = "Tải lại trang LMS rồi thử lại.";

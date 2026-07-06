@@ -59,10 +59,12 @@
     const durationText = plyrRoot?.querySelector('.plyr__time--duration')?.textContent?.trim();
     const speedText = plyrRoot?.querySelector('[id$="-speed"] [data-plyr="speed"][aria-checked="true"] span')?.textContent?.trim();
 
-    const duration = Number.isFinite(video.duration) ? video.duration : Number(seek?.getAttribute("aria-valuemax"));
-    const currentTime = Number.isFinite(video.currentTime) && video.currentTime > 0
+    const rawDuration = Number.isFinite(video.duration) ? video.duration : Number(seek?.getAttribute("aria-valuemax"));
+    const rawCurrentTime = Number.isFinite(video.currentTime) && video.currentTime > 0
       ? video.currentTime
       : Number(seek?.getAttribute("aria-valuenow"));
+    const duration = Number.isFinite(rawDuration) ? rawDuration : 0;
+    const currentTime = Number.isFinite(rawCurrentTime) ? rawCurrentTime : 0;
     const progress = duration > 0 ? Math.min(100, Math.max(0, (currentTime / duration) * 100)) : 0;
 
     return {
@@ -117,6 +119,8 @@
       message,
       checkedAt: new Date().toISOString()
     });
+
+    chrome.runtime.sendMessage({ type: "RELEASE_KEEP_AWAKE" });
   }
 
   function updateStatus() {
@@ -368,6 +372,7 @@
   }
 
   async function startStudyAutomation() {
+    chrome.runtime.sendMessage({ type: "REQUEST_KEEP_AWAKE" });
     automationRunning = true;
     endedNoticeShown = false;
     return startStudyStep();
