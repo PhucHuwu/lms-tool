@@ -1,8 +1,4 @@
 const statusEl = document.querySelector("#status");
-const timeEl = document.querySelector("#time");
-const progressEl = document.querySelector("#progress");
-const speedEl = document.querySelector("#speed");
-const volumeEl = document.querySelector("#volume");
 const studyStatusEl = document.querySelector("#study-status");
 const startButton = document.querySelector("#start");
 const stopButton = document.querySelector("#stop");
@@ -15,10 +11,6 @@ function setStatusClass(className) {
 function renderMissing(message) {
   setStatusClass("missing");
   statusEl.textContent = message;
-  timeEl.textContent = "--";
-  progressEl.textContent = "--";
-  speedEl.textContent = "--";
-  volumeEl.textContent = "--";
 }
 
 function renderStatus(status) {
@@ -38,12 +30,6 @@ function renderStatus(status) {
     statusEl.textContent = "Đang tạm dừng";
   }
 
-  const progress = Number.isFinite(status.progress) ? status.progress : 0;
-
-  timeEl.textContent = `${status.currentTimeText || "00:00"} / ${status.durationText || "00:00"}`;
-  progressEl.textContent = `${progress.toFixed(1)}%`;
-  speedEl.textContent = status.speedText || `${status.playbackRate}x`;
-  volumeEl.textContent = status.muted ? "Tắt tiếng" : `${Math.round(status.volume * 100)}%`;
 }
 
 async function checkStatus() {
@@ -73,7 +59,7 @@ async function startStudy() {
   }
 
   startButton.disabled = true;
-  studyStatusEl.textContent = "Đang chạy kịch bản kiểm thử...";
+  studyStatusEl.textContent = "Đang chạy hỗ trợ phát bài học...";
   chrome.runtime.sendMessage({ type: "REQUEST_KEEP_AWAKE" });
 
   chrome.tabs.sendMessage(tab.id, { type: "START_LMS_STUDY_AUTOMATION" }, (response) => {
@@ -110,7 +96,7 @@ async function stopStudy() {
       return;
     }
 
-    studyStatusEl.textContent = response?.message || "Đã dừng kịch bản kiểm thử.";
+    studyStatusEl.textContent = response?.message || "Đã dừng.";
     checkStatus();
   });
 }

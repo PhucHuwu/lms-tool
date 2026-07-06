@@ -372,7 +372,7 @@
 
       if (startQuizButton) {
         startQuizButton.scrollIntoView({ block: "center", behavior: "smooth" });
-        stopAutomation(`Đã đến bước Bắt đầu làm bài. Tạm dừng để kiểm thử thủ công: ${lesson.title}`);
+        stopAutomation(`Đã đến bước Bắt đầu làm bài. Tạm dừng để xử lý thủ công: ${lesson.title}`);
       } else {
         stopAutomation(`Tạm dừng tại bài cần test thủ công: ${lesson.title}. Không tìm thấy nút Bắt đầu làm bài.`);
       }
@@ -436,7 +436,7 @@
     }
 
     if (message?.type === "STOP_LMS_STUDY_AUTOMATION") {
-      stopAutomation("Đã dừng kịch bản kiểm thử.");
+      stopAutomation("Đã dừng.");
       sendResponse(window[STUDY_STATE_KEY]);
       return true;
     }
