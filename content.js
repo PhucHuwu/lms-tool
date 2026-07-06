@@ -4,6 +4,9 @@
   let observedVideo = null;
   let observer = null;
   let endedNoticeShown = false;
+  let automationRunning = false;
+  let automationTimer = null;
+  let currentLessonId = "";
 
   function formatTime(seconds) {
     if (!Number.isFinite(seconds)) return "00:00";
@@ -58,15 +61,9 @@
     document.documentElement.dataset.lmsVideoPlaying = status.playing ? "true" : "false";
     window.dispatchEvent(new CustomEvent("lms-video-status", { detail: status }));
 
-    if (status.ended && !endedNoticeShown) {
+    if (status.ended && automationRunning && !endedNoticeShown) {
       endedNoticeShown = true;
-      const nextLesson = findFirstUnwatchedLesson();
-      saveStudyStatus({
-        running: false,
-        message: nextLesson ? "Video da ket thuc. Bam Bat dau hoc de mo bai tiep theo." : "Video da ket thuc. Khong tim thay bai chua xem tiep theo.",
-        nextLessonTitle: nextLesson?.title || "",
-        checkedAt: new Date().toISOString()
-      });
+      scheduleNextLesson();
     }
 
     if (!status.ended) endedNoticeShown = false;
@@ -77,8 +74,23 @@
     window.dispatchEvent(new CustomEvent("lms-study-assistant-status", { detail: status }));
   }
 
+  function stopAutomation(message) {
+    automationRunning = false;
+
+    if (automationTimer) {
+      clearTimeout(automationTimer);
+      automationTimer = null;
+    }
+
+    saveStudyStatus({
+      running: false,
+      message,
+      checkedAt: new Date().toISOString()
+    });
+  }
+
   function updateStatus() {
-    const video = observedVideo || document.querySelector(".lesson-video-styles__VideoContainer-sc-f73a8977-0 video, .plyr video, video");
+    const video = document.querySelector(".lesson-video-styles__VideoContainer-sc-f73a8977-0 video, .plyr video, video") || observedVideo;
 
     if (!video) {
       saveStatus({ found: false, checkedAt: new Date().toISOString() });
@@ -137,16 +149,43 @@
       || "Bai hoc chua co ten";
   }
 
-  function findFirstUnwatchedLesson() {
+  function findFirstUnwatchedLesson(excludeLessonId = "") {
     return getLessons()
       .filter((lesson) => lesson.getAttribute("aria-disabled") !== "true")
+      .filter((lesson) => lesson.getAttribute("data-lesson-id") !== excludeLessonId)
       .map((lesson) => ({
         element: lesson,
+        id: lesson.getAttribute("data-lesson-id") || "",
         title: getLessonTitle(lesson),
         checked: isLessonChecked(lesson),
         active: lesson.getAttribute("data-lesson-active") === "true"
       }))
       .find((lesson) => !lesson.checked);
+  }
+
+  function isIncompleteSection(item) {
+    const progress = item.querySelector('[role="progressbar"]')?.getAttribute("aria-valuenow");
+    const meta = item.textContent?.match(/(\d+)\s*\/\s*(\d+)/);
+
+    if (progress !== null && progress !== undefined) return Number(progress) < 100;
+    if (meta) return Number(meta[1]) < Number(meta[2]);
+    return true;
+  }
+
+  async function expandNextIncompleteSection() {
+    const collapsedSection = Array.from(document.querySelectorAll(".ant-collapse-item"))
+      .find((item) => {
+        const header = item.querySelector(".ant-collapse-header[aria-expanded='false']");
+        return header && isIncompleteSection(item);
+      });
+
+    const header = collapsedSection?.querySelector(".ant-collapse-header");
+    if (!header) return false;
+
+    header.scrollIntoView({ block: "center", behavior: "smooth" });
+    header.click();
+    await sleep(900);
+    return true;
   }
 
   function setPlaybackRate(video, rate) {
@@ -188,16 +227,32 @@
     };
   }
 
-  async function startStudyOnce() {
-    const lesson = findFirstUnwatchedLesson();
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  async function waitForLessonChecked(lessonId, timeoutMs = 15000) {
+    const startedAt = Date.now();
+
+    while (Date.now() - startedAt < timeoutMs) {
+      const lesson = lessonId ? document.querySelector(`[data-lesson-id="${CSS.escape(lessonId)}"]`) : null;
+
+      if (!lesson || isLessonChecked(lesson)) return true;
+      await sleep(500);
+    }
+
+    return false;
+  }
+
+  async function startStudyStep(excludeLessonId = "") {
+    let lesson = findFirstUnwatchedLesson(excludeLessonId);
+
+    if (!lesson && await expandNextIncompleteSection()) {
+      lesson = findFirstUnwatchedLesson(excludeLessonId);
+    }
 
     if (!lesson) {
-      const result = await startCurrentVideo();
-      saveStudyStatus({
-        running: result.ok,
-        message: result.ok ? result.message : "Khong tim thay bai chua xem co the mo.",
-        checkedAt: new Date().toISOString()
-      });
+      stopAutomation("Da hoan tat kich ban hoac khong con bai chua xem co the mo.");
       return window[STUDY_STATE_KEY];
     }
 
@@ -205,7 +260,7 @@
       lesson.element.scrollIntoView({ block: "center", behavior: "smooth" });
       lesson.element.click();
       saveStudyStatus({
-        running: true,
+        running: automationRunning,
         message: `Dang mo bai: ${lesson.title}`,
         lessonTitle: lesson.title,
         checkedAt: new Date().toISOString()
@@ -214,9 +269,17 @@
       await new Promise((resolve) => setTimeout(resolve, 1800));
     }
 
+    currentLessonId = lesson.id;
+
     const result = await startCurrentVideo();
+
+    if (!result.ok) {
+      stopAutomation(result.message);
+      return window[STUDY_STATE_KEY];
+    }
+
     saveStudyStatus({
-      running: result.ok,
+      running: automationRunning,
       message: result.message,
       lessonTitle: lesson.title,
       checkedAt: new Date().toISOString()
@@ -225,9 +288,42 @@
     return window[STUDY_STATE_KEY];
   }
 
+  async function startStudyAutomation() {
+    automationRunning = true;
+    endedNoticeShown = false;
+    return startStudyStep();
+  }
+
+  function scheduleNextLesson() {
+    if (!automationRunning) return;
+
+    saveStudyStatus({
+      running: true,
+      message: "Video da ket thuc. Dang cho LMS cap nhat tien do...",
+      checkedAt: new Date().toISOString()
+    });
+
+    if (automationTimer) clearTimeout(automationTimer);
+    automationTimer = setTimeout(async () => {
+      automationTimer = null;
+
+      if (!automationRunning) return;
+      const progressUpdated = await waitForLessonChecked(currentLessonId);
+
+      if (!automationRunning) return;
+      startStudyStep(progressUpdated ? "" : currentLessonId);
+    }, 2500);
+  }
+
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-    if (message?.type === "START_LMS_STUDY_ONCE") {
-      startStudyOnce().then(sendResponse);
+    if (message?.type === "START_LMS_STUDY_AUTOMATION") {
+      startStudyAutomation().then(sendResponse);
+      return true;
+    }
+
+    if (message?.type === "STOP_LMS_STUDY_AUTOMATION") {
+      stopAutomation("Da dung kich ban kiem thu.");
+      sendResponse(window[STUDY_STATE_KEY]);
       return true;
     }
 

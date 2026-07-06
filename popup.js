@@ -5,6 +5,7 @@ const speedEl = document.querySelector("#speed");
 const volumeEl = document.querySelector("#volume");
 const studyStatusEl = document.querySelector("#study-status");
 const startButton = document.querySelector("#start");
+const stopButton = document.querySelector("#stop");
 const refreshButton = document.querySelector("#refresh");
 
 function setStatusClass(className) {
@@ -70,12 +71,13 @@ async function startStudy() {
   }
 
   startButton.disabled = true;
-  studyStatusEl.textContent = "Dang tim bai chua xem...";
+  studyStatusEl.textContent = "Dang chay kich ban kiem thu...";
 
-  chrome.tabs.sendMessage(tab.id, { type: "START_LMS_STUDY_ONCE" }, (response) => {
-    startButton.disabled = false;
+  chrome.tabs.sendMessage(tab.id, { type: "START_LMS_STUDY_AUTOMATION" }, (response) => {
+    startButton.disabled = Boolean(response?.running);
 
     if (chrome.runtime.lastError) {
+      startButton.disabled = false;
       studyStatusEl.textContent = "Tai lai trang LMS roi thu lai.";
       return;
     }
@@ -88,6 +90,28 @@ async function startStudy() {
   });
 }
 
+async function stopStudy() {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+  if (!tab?.id || !tab.url?.startsWith("https://lms.ptit.edu.vn/")) {
+    renderMissing("Hay mo trang lms.ptit.edu.vn");
+    return;
+  }
+
+  chrome.tabs.sendMessage(tab.id, { type: "STOP_LMS_STUDY_AUTOMATION" }, (response) => {
+    startButton.disabled = false;
+
+    if (chrome.runtime.lastError) {
+      studyStatusEl.textContent = "Tai lai trang LMS roi thu lai.";
+      return;
+    }
+
+    studyStatusEl.textContent = response?.message || "Da dung kich ban kiem thu.";
+    checkStatus();
+  });
+}
+
 startButton.addEventListener("click", startStudy);
+stopButton.addEventListener("click", stopStudy);
 refreshButton.addEventListener("click", checkStatus);
 checkStatus();

@@ -84,6 +84,9 @@ button {
 
 button + button {
   margin-top: 8px;
+}
+
+button.secondary {
   color: #1e293b;
   background: #dbeafe;
 }
@@ -92,6 +95,11 @@ button:hover {
   background: #1d4ed8;
 }
 
-button + button:hover {
+button.secondary:hover {
   background: #bfdbfe;
+}
+
+button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
