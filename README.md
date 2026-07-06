@@ -26,7 +26,7 @@ Nút `Bắt đầu học` trong popup sẽ chạy kịch bản kiểm thử trê
 - Bỏ qua bài bị khóa với `aria-disabled="true"`.
 - Mở bài đó nếu bài chưa active.
 - Tìm video trực tiếp trong trang hoặc trong iframe H5P có thể truy cập được.
-- Đặt tốc độ video thành `4x` nếu trình phát cho phép; nếu không được thì tự chuyển sang `2x`.
+- Đặt tốc độ video thành `20x` nếu trình phát cho phép; nếu không được thì tự chuyển sang `4x`, rồi `2x`.
 - Tắt tiếng video và đặt âm lượng về `0%` để tránh ồn trong lúc kiểm thử.
 - Phát video sau thao tác bấm nút của người dùng.
 - Khi video kết thúc, chờ LMS cập nhật tiến độ rồi chuyển sang bài chưa xem tiếp theo.

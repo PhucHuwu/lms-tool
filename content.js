@@ -234,6 +234,7 @@
   }
 
   function setPreferredPlaybackRate(video) {
+    if (setPlaybackRate(video, 20)) return 20;
     if (setPlaybackRate(video, 4)) return 4;
     if (setPlaybackRate(video, 2)) return 2;
     return video.playbackRate;
@@ -275,11 +276,13 @@
     updateStatus();
     return {
       ok: true,
-      message: playbackRate === 4
-        ? "Đang phát video với tốc độ 4x."
-        : playbackRate === 2
-          ? "Không đặt được 4x, đang phát video với tốc độ 2x."
-          : `Không đặt được 4x hoặc 2x, đang phát với tốc độ ${playbackRate}x.`,
+      message: playbackRate === 20
+        ? "Đang phát video với tốc độ 20x."
+        : playbackRate === 4
+          ? "Không đặt được 20x, đang phát video với tốc độ 4x."
+          : playbackRate === 2
+            ? "Không đặt được 20x hoặc 4x, đang phát video với tốc độ 2x."
+            : `Không đặt được 20x, 4x hoặc 2x, đang phát với tốc độ ${playbackRate}x.`,
       playbackRate,
       muted
     };
