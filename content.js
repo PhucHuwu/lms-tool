@@ -135,6 +135,82 @@
     chrome.runtime.sendMessage({ type: "RELEASE_KEEP_AWAKE" });
   }
 
+  function showNotification(title, message) {
+    chrome.runtime.sendMessage({
+      type: "SHOW_NOTIFICATION",
+      title,
+      message
+    });
+  }
+
+  function showInPageNotice(title, message) {
+    const existingNotice = document.querySelector("#lms-assistant-notice");
+    existingNotice?.remove();
+
+    const notice = document.createElement("div");
+    notice.id = "lms-assistant-notice";
+    notice.setAttribute("role", "alert");
+    notice.innerHTML = `
+      <div class="lms-assistant-notice__title"></div>
+      <div class="lms-assistant-notice__message"></div>
+      <button type="button" class="lms-assistant-notice__button">Đã hiểu</button>
+    `;
+
+    const style = document.createElement("style");
+    style.id = "lms-assistant-notice-style";
+    style.textContent = `
+      #lms-assistant-notice {
+        position: fixed;
+        top: 18px;
+        right: 18px;
+        z-index: 2147483647;
+        width: min(380px, calc(100vw - 36px));
+        padding: 16px;
+        border: 1px solid #bfdbfe;
+        border-radius: 14px;
+        color: #172033;
+        background: #ffffff;
+        box-shadow: 0 18px 50px rgba(15, 23, 42, 0.25);
+        font-family: Arial, sans-serif;
+      }
+
+      .lms-assistant-notice__title {
+        margin-bottom: 6px;
+        color: #1d4ed8;
+        font-size: 16px;
+        font-weight: 700;
+      }
+
+      .lms-assistant-notice__message {
+        margin-bottom: 12px;
+        color: #475569;
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .lms-assistant-notice__button {
+        width: 100%;
+        border: 0;
+        border-radius: 10px;
+        padding: 9px 12px;
+        color: #ffffff;
+        background: #2563eb;
+        font-weight: 700;
+        cursor: pointer;
+      }
+    `;
+
+    if (!document.querySelector("#lms-assistant-notice-style")) {
+      document.documentElement.appendChild(style);
+    }
+
+    notice.querySelector(".lms-assistant-notice__title").textContent = title;
+    notice.querySelector(".lms-assistant-notice__message").textContent = message;
+    notice.querySelector("button").addEventListener("click", () => notice.remove());
+
+    document.documentElement.appendChild(notice);
+  }
+
   function updateStatus() {
     const video = findVideoElement() || observedVideo;
 
@@ -407,7 +483,10 @@
 
     if (quizElement) {
       quizElement.scrollIntoView({ block: "center", behavior: "smooth" });
-      stopAutomation(`Đã phát hiện bài quiz. Tạm dừng để xử lý thủ công: ${lesson.title}`);
+      const message = `Đã phát hiện bài quiz. Tạm dừng để xử lý thủ công: ${lesson.title}`;
+      showInPageNotice("Đã phát hiện bài quiz", `Tiện ích đã tạm dừng tại bài: ${lesson.title}. Vui lòng xử lý thủ công trên trang LMS.`);
+      showNotification("Đã phát hiện bài quiz", `Vui lòng xử lý thủ công: ${lesson.title}`);
+      stopAutomation(message);
       return window[STUDY_STATE_KEY];
     }
 

@@ -11,5 +11,19 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     return true;
   }
 
+  if (message?.type === "SHOW_NOTIFICATION") {
+    chrome.notifications.create({
+      type: "basic",
+      iconUrl: "icon.svg",
+      title: message.title || "LMS Assistant",
+      message: message.message || "Có trạng thái mới cần xử lý.",
+      priority: 2
+    }, () => {
+      sendResponse({ ok: !chrome.runtime.lastError });
+    });
+
+    return true;
+  }
+
   return false;
 });

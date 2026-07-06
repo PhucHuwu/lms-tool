@@ -5,7 +5,7 @@
   "version": "1.0.0",
   "description": "Hỗ trợ theo dõi và tự động phát video bài học trên LMS PTIT.",
   "minimum_chrome_version": "102",
-  "permissions": ["activeTab", "power", "storage"],
+  "permissions": ["activeTab", "power", "storage", "notifications"],
   "host_permissions": ["https://lms.ptit.edu.vn/*"],
   "content_scripts": [
     {

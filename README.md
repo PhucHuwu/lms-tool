@@ -14,6 +14,7 @@ LMS Assistant là tiện ích mở rộng cho Google Chrome hỗ trợ tự đ�
 - Tự mở các mục/chương chưa hoàn thành nếu danh sách bài học đang bị thu gọn.
 - Giữ màn hình không ngủ trong lúc chạy hỗ trợ phát bài học.
 - Tạm dừng khi phát hiện nội dung quiz để người dùng xử lý thủ công.
+- Hiển thị banner nổi trực tiếp trên trang LMS và notification của Chrome khi phát hiện quiz.
 - Giả lập trạng thái trang luôn hiển thị để hạn chế việc video bị dừng khi chuyển tab hoặc mất focus.
 
 ## Yêu cầu
