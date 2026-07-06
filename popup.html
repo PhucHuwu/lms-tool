@@ -11,8 +11,26 @@
       <h1>LMS Assistant</h1>
       <p id="status" class="status">Đang kiểm tra...</p>
       <p id="study-status" class="study-status">Bấm Bắt đầu để chạy hỗ trợ phát bài học.</p>
+      <label class="field" for="volume">
+        <span>Âm lượng phát</span>
+        <select id="volume">
+          <option value="0">0%</option>
+          <option value="10">10%</option>
+          <option value="25">25%</option>
+          <option value="50">50%</option>
+          <option value="100">100%</option>
+        </select>
+      </label>
+      <label class="field" for="speed">
+        <span>Tốc độ phát</span>
+        <select id="speed">
+          <option value="1">Normal</option>
+          <option value="2">2x</option>
+          <option value="4">4x</option>
+        </select>
+      </label>
+      <p id="volume-note" class="volume-note">Lưu ý: ở 0%, video có thể không được tính là đã xem.</p>
       <button id="start" type="button">Bắt đầu</button>
-      <button id="stop" type="button" class="secondary">Dừng</button>
     </main>
     <script src="popup.js"></script>
   </body>

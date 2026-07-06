@@ -6,7 +6,10 @@
   let endedNoticeShown = false;
   let automationRunning = false;
   let automationTimer = null;
+  let resumeTimer = null;
   let currentLessonId = "";
+  let playbackVolumePercent = 25;
+  let preferredPlaybackRate = 1;
 
   function formatTime(seconds) {
     if (!Number.isFinite(seconds)) return "00:00";
@@ -98,6 +101,10 @@
       scheduleNextLesson();
     }
 
+    if (status.found && status.paused && !status.ended && automationRunning) {
+      scheduleResumeVideo();
+    }
+
     if (!status.ended) endedNoticeShown = false;
   }
 
@@ -112,6 +119,11 @@
     if (automationTimer) {
       clearTimeout(automationTimer);
       automationTimer = null;
+    }
+
+    if (resumeTimer) {
+      clearTimeout(resumeTimer);
+      resumeTimer = null;
     }
 
     saveStudyStatus({
@@ -275,20 +287,23 @@
   }
 
   function setPreferredPlaybackRate(video) {
-    if (setPlaybackRate(video, 4)) return 4;
-    if (setPlaybackRate(video, 2)) return 2;
+    const playbackRate = [1, 2, 4].includes(Number(preferredPlaybackRate)) ? Number(preferredPlaybackRate) : 1;
+
+    if (setPlaybackRate(video, playbackRate)) return playbackRate;
     return video.playbackRate;
   }
 
-  function muteVideo(video) {
+  function applyVolume(video) {
+    const volumePercent = Math.min(100, Math.max(0, Number(playbackVolumePercent) || 0));
+
     try {
-      video.muted = true;
-      video.volume = 0;
+      video.volume = volumePercent / 100;
+      video.muted = volumePercent === 0;
     } catch (_error) {
       return false;
     }
 
-    return video.muted && video.volume === 0;
+    return Math.round(video.volume * 100) === volumePercent && video.muted === (volumePercent === 0);
   }
 
   async function startCurrentVideo() {
@@ -300,7 +315,7 @@
 
     attachVideo(video);
     const playbackRate = setPreferredPlaybackRate(video);
-    const muted = muteVideo(video);
+    const volumeApplied = applyVolume(video);
 
     try {
       await video.play();
@@ -309,21 +324,40 @@
         ok: false,
         message: "Chrome chặn tự động phát. Hãy bấm Play trên video.",
         playbackRate,
-        muted
+        volumeApplied
       };
     }
 
     updateStatus();
     return {
       ok: true,
-      message: playbackRate === 4
-        ? "Đang phát video với tốc độ 4x."
-        : playbackRate === 2
-          ? "Không đặt được 4x, đang phát video với tốc độ 2x."
-          : `Không đặt được 4x hoặc 2x, đang phát với tốc độ ${playbackRate}x.`,
+      message: playbackRate === Number(preferredPlaybackRate)
+        ? `Đang phát video với tốc độ ${playbackRate === 1 ? "Normal" : `${playbackRate}x`}.`
+        : `Không đặt được tốc độ đã chọn, đang phát với tốc độ ${playbackRate}x.`,
       playbackRate,
-      muted
+      volumeApplied
     };
+  }
+
+  async function resumeCurrentVideo() {
+    const video = findVideoElement();
+
+    if (!video || video.ended || !automationRunning) return;
+
+    attachVideo(video);
+    setPreferredPlaybackRate(video);
+    applyVolume(video);
+
+    try {
+      await video.play();
+      updateStatus();
+    } catch (_error) {
+      saveStudyStatus({
+        running: automationRunning,
+        message: "Video đang tạm dừng. Hãy bấm Play để tiếp tục.",
+        checkedAt: new Date().toISOString()
+      });
+    }
   }
 
   function sleep(ms) {
@@ -398,6 +432,13 @@
 
   async function startStudyAutomation() {
     chrome.runtime.sendMessage({ type: "REQUEST_KEEP_AWAKE" });
+    const settings = await chrome.storage.local.get({
+      playbackVolumePercent: 25,
+      playbackRate: 1
+    });
+
+    playbackVolumePercent = settings.playbackVolumePercent;
+    preferredPlaybackRate = settings.playbackRate;
     automationRunning = true;
     endedNoticeShown = false;
     return startStudyStep();
@@ -422,6 +463,17 @@
       if (!automationRunning) return;
       startStudyStep(progressUpdated ? "" : currentLessonId);
     }, 2500);
+  }
+
+  function scheduleResumeVideo() {
+    if (resumeTimer) return;
+
+    resumeTimer = setTimeout(() => {
+      resumeTimer = null;
+
+      if (!automationRunning) return;
+      resumeCurrentVideo();
+    }, 1200);
   }
 
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {

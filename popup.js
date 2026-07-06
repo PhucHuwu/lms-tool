@@ -1,7 +1,46 @@
 const statusEl = document.querySelector("#status");
 const studyStatusEl = document.querySelector("#study-status");
 const startButton = document.querySelector("#start");
-const stopButton = document.querySelector("#stop");
+const volumeSelect = document.querySelector("#volume");
+const speedSelect = document.querySelector("#speed");
+const volumeNote = document.querySelector("#volume-note");
+
+const DEFAULT_VOLUME_PERCENT = 25;
+const DEFAULT_PLAYBACK_RATE = 1;
+
+function updateVolumeNote() {
+  volumeNote.classList.toggle("hidden", volumeSelect.value !== "0");
+}
+
+function getSelectedVolumePercent() {
+  const volumePercent = Number(volumeSelect.value);
+  return Number.isFinite(volumePercent) ? volumePercent : DEFAULT_VOLUME_PERCENT;
+}
+
+function getSelectedPlaybackRate() {
+  const playbackRate = Number(speedSelect.value);
+  return [1, 2, 4].includes(playbackRate) ? playbackRate : DEFAULT_PLAYBACK_RATE;
+}
+
+async function loadSettings() {
+  const result = await chrome.storage.local.get({
+    playbackVolumePercent: DEFAULT_VOLUME_PERCENT,
+    playbackRate: DEFAULT_PLAYBACK_RATE
+  });
+
+  volumeSelect.value = String(result.playbackVolumePercent);
+  speedSelect.value = String(result.playbackRate);
+  updateVolumeNote();
+}
+
+async function saveSettings() {
+  await chrome.storage.local.set({
+    playbackVolumePercent: getSelectedVolumePercent(),
+    playbackRate: getSelectedPlaybackRate()
+  });
+
+  updateVolumeNote();
+}
 
 function setStatusClass(className) {
   statusEl.className = `status ${className || ""}`.trim();
@@ -59,6 +98,7 @@ async function startStudy() {
 
   startButton.disabled = true;
   studyStatusEl.textContent = "Đang chạy hỗ trợ phát bài học...";
+  await saveSettings();
   chrome.runtime.sendMessage({ type: "REQUEST_KEEP_AWAKE" });
 
   chrome.tabs.sendMessage(tab.id, { type: "START_LMS_STUDY_AUTOMATION" }, (response) => {
@@ -78,28 +118,8 @@ async function startStudy() {
   });
 }
 
-async function stopStudy() {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
-  if (!tab?.id || !tab.url?.startsWith("https://lms.ptit.edu.vn/")) {
-    renderMissing("Hãy mở trang lms.ptit.edu.vn");
-    return;
-  }
-
-  chrome.tabs.sendMessage(tab.id, { type: "STOP_LMS_STUDY_AUTOMATION" }, (response) => {
-    startButton.disabled = false;
-    chrome.runtime.sendMessage({ type: "RELEASE_KEEP_AWAKE" });
-
-    if (chrome.runtime.lastError) {
-      studyStatusEl.textContent = "Tải lại trang LMS rồi thử lại.";
-      return;
-    }
-
-    studyStatusEl.textContent = response?.message || "Đã dừng.";
-    checkStatus();
-  });
-}
-
 startButton.addEventListener("click", startStudy);
-stopButton.addEventListener("click", stopStudy);
+volumeSelect.addEventListener("change", saveSettings);
+speedSelect.addEventListener("change", saveSettings);
+loadSettings();
 checkStatus();

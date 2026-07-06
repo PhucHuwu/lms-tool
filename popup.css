@@ -50,6 +50,36 @@ h1 {
   line-height: 1.4;
 }
 
+.field {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 10px;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+select {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 9px 10px;
+  color: #172033;
+  background: white;
+  font: inherit;
+}
+
+.volume-note {
+  margin: 0 0 14px;
+  color: #92400e;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.volume-note.hidden {
+  display: none;
+}
+
 button {
   width: 100%;
   border: 0;

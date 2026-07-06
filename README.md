@@ -7,8 +7,9 @@ LMS Assistant là tiện ích mở rộng cho Google Chrome hỗ trợ tự đ�
 - Tự động tìm video bài học trên LMS PTIT.
 - Hiển thị trạng thái video hiện tại: đang phát, tạm dừng, đã phát xong hoặc không tìm thấy video.
 - Tự động mở bài học chưa hoàn thành trong danh sách bài học.
-- Tự động phát video và ưu tiên tốc độ `4x`; nếu không được sẽ thử `2x`.
-- Tự động tắt tiếng video khi phát.
+- Cho phép chọn tốc độ phát `Normal`, `2x`, `4x`; mặc định là `Normal`.
+- Cho phép chọn âm lượng phát `0%`, `10%`, `25%`, `50%`, `100%`; mặc định là `25%`. Ở `0%`, video có thể không được tính là đã xem tùy LMS/player.
+- Tự thử phát lại nếu video bị tạm dừng giữa chừng, ví dụ khi xuất hiện tương tác trong video.
 - Tự động chuyển sang bài tiếp theo sau khi video kết thúc và LMS đã cập nhật tiến độ.
 - Tự mở các mục/chương chưa hoàn thành nếu danh sách bài học đang bị thu gọn.
 - Giữ màn hình không ngủ trong lúc chạy hỗ trợ phát bài học.
@@ -39,7 +40,7 @@ Hiện tại dự án là Chrome Extension thuần, không cần cài `npm`, kh�
 4. Bấm `Bắt đầu` để chạy hỗ trợ phát bài học.
 5. Tiện ích sẽ tự tìm bài chưa xem, mở bài, phát video, tắt tiếng và đặt tốc độ phát cao nhất có thể.
 6. Khi video kết thúc, tiện ích chờ LMS cập nhật tiến độ rồi chuyển sang bài tiếp theo.
-7. Bấm `Dừng` nếu muốn dừng quá trình tự động.
+7. Đóng hoặc reload tab LMS nếu muốn dừng quá trình đang chạy.
 
 ## Trạng thái trong popup
 
@@ -55,7 +56,8 @@ Hiện tại dự án là Chrome Extension thuần, không cần cài `npm`, kh�
 - Tiện ích chỉ chạy trên domain `https://lms.ptit.edu.vn/*`.
 - Nếu Chrome chặn tự động phát, hãy bấm Play trực tiếp trên video một lần rồi chạy lại tiện ích.
 - Với bài có nội dung quiz như nút `Bắt đầu làm bài`, nút `Nộp bài`, `radiogroup` hoặc radio quiz, tiện ích sẽ dừng lại để bạn làm thủ công.
-- Tốc độ phát phụ thuộc vào trình phát video/LMS. Nếu không đặt được `4x`, tiện ích sẽ thử `2x`; nếu vẫn không được sẽ dùng tốc độ hiện tại.
+- Tốc độ phát phụ thuộc vào trình phát video/LMS. Nếu không đặt được tốc độ đã chọn, tiện ích sẽ dùng tốc độ hiện tại.
+- Nên dùng âm lượng lớn hơn `0%` nếu LMS/player yêu cầu âm thanh để ghi nhận lượt xem.
 - Không nên đóng tab LMS trong lúc tiện ích đang chạy.
 - Khi cập nhật mã nguồn tiện ích, hãy vào `chrome://extensions/` và bấm reload tiện ích để áp dụng thay đổi.
 
@@ -66,7 +68,7 @@ Hiện tại dự án là Chrome Extension thuần, không cần cài `npm`, kh�
 ├── manifest.json            # Cấu hình Chrome Extension
 ├── popup.html               # Giao diện popup
 ├── popup.css                # Giao diện và màu sắc popup
-├── popup.js                 # Xử lý nút Bắt đầu/Dừng và hiển thị trạng thái
+├── popup.js                 # Xử lý nút Bắt đầu, cấu hình phát và hiển thị trạng thái
 ├── content.js               # Logic tìm video, tự phát bài học và chuyển bài
 ├── background.js            # Giữ màn hình không ngủ khi đang chạy
 └── visibility-override.js   # Giả lập trang luôn hiển thị/focus
