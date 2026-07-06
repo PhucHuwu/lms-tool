@@ -187,6 +187,41 @@
     return /câu\s*hỏi\s*ôn\s*tập\s*chương/i.test(title);
   }
 
+  function findButtonByText(text) {
+    const normalizedText = text.trim().toLowerCase();
+
+    return Array.from(document.querySelectorAll("button"))
+      .find((button) => button.textContent?.trim().toLowerCase() === normalizedText) || null;
+  }
+
+  async function openLesson(lesson) {
+    if (lesson.active) return;
+
+    lesson.element.scrollIntoView({ block: "center", behavior: "smooth" });
+    lesson.element.click();
+    saveStudyStatus({
+      running: automationRunning,
+      message: `Đang mở bài: ${lesson.title}`,
+      lessonTitle: lesson.title,
+      checkedAt: new Date().toISOString()
+    });
+
+    await sleep(1800);
+  }
+
+  async function waitForButtonByText(text, timeoutMs = 10000) {
+    const startedAt = Date.now();
+
+    while (Date.now() - startedAt < timeoutMs) {
+      const button = findButtonByText(text);
+
+      if (button && !button.disabled && button.getAttribute("aria-disabled") !== "true") return button;
+      await sleep(300);
+    }
+
+    return null;
+  }
+
   function findFirstUnwatchedLesson(excludeLessonId = "") {
     return getLessons()
       .filter((lesson) => lesson.getAttribute("aria-disabled") !== "true")
@@ -331,23 +366,21 @@
     }
 
     if (isReviewQuestionLesson(lesson.title)) {
-      lesson.element.scrollIntoView({ block: "center", behavior: "smooth" });
-      stopAutomation(`Tạm dừng tại bài cần test thủ công: ${lesson.title}`);
+      await openLesson(lesson);
+
+      const startQuizButton = await waitForButtonByText("Bắt đầu làm bài");
+
+      if (startQuizButton) {
+        startQuizButton.scrollIntoView({ block: "center", behavior: "smooth" });
+        stopAutomation(`Đã đến bước Bắt đầu làm bài. Tạm dừng để kiểm thử thủ công: ${lesson.title}`);
+      } else {
+        stopAutomation(`Tạm dừng tại bài cần test thủ công: ${lesson.title}. Không tìm thấy nút Bắt đầu làm bài.`);
+      }
+
       return window[STUDY_STATE_KEY];
     }
 
-    if (!lesson.active) {
-      lesson.element.scrollIntoView({ block: "center", behavior: "smooth" });
-      lesson.element.click();
-      saveStudyStatus({
-        running: automationRunning,
-        message: `Đang mở bài: ${lesson.title}`,
-        lessonTitle: lesson.title,
-        checkedAt: new Date().toISOString()
-      });
-
-      await new Promise((resolve) => setTimeout(resolve, 1800));
-    }
+    await openLesson(lesson);
 
     currentLessonId = lesson.id;
 

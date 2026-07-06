@@ -31,7 +31,7 @@ Nút `Bắt đầu học` trong popup sẽ chạy kịch bản kiểm thử trê
 - Phát video sau thao tác bấm nút của người dùng.
 - Khi video kết thúc, chờ LMS cập nhật tiến độ rồi chuyển sang bài chưa xem tiếp theo.
 - Dừng khi hết bài có thể mở, khi Chrome chặn phát video, hoặc khi bấm `Dừng`.
-- Tạm dừng khi gặp bài có tiêu đề `Câu hỏi ôn tập chương` để người kiểm thử làm thủ công.
+- Khi gặp bài có tiêu đề `Câu hỏi ôn tập chương`, tool mở bài, cuộn tới nút `Bắt đầu làm bài`, rồi tạm dừng để người kiểm thử làm thủ công.
 - Giữ máy/màn hình thức trong lúc chạy bằng `chrome.power.requestKeepAwake("display")` để giảm khả năng video bị dừng do hệ thống sleep.
 - Chạy `visibility-override.js` ở `document_start` trong main world và iframe để giảm trường hợp player tự pause khi tab/cửa sổ bị ẩn.
 
