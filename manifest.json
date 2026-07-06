@@ -1,9 +1,11 @@
 {
   "manifest_version": 3,
-  "name": "LMS Video Status Checker",
+  "name": "LMS Assistant",
+  "short_name": "LMS Assistant",
   "version": "1.0.0",
-  "description": "Theo dõi trạng thái phát video Plyr trên lms.ptit.edu.vn.",
-  "permissions": ["activeTab", "scripting", "power"],
+  "description": "Hỗ trợ theo dõi và tự động phát video bài học trên LMS PTIT.",
+  "minimum_chrome_version": "102",
+  "permissions": ["activeTab", "power"],
   "host_permissions": ["https://lms.ptit.edu.vn/*"],
   "content_scripts": [
     {
@@ -26,7 +28,7 @@
     "service_worker": "background.js"
   },
   "action": {
-    "default_title": "LMS Video Status",
+    "default_title": "LMS Assistant",
     "default_popup": "popup.html"
   }
 }

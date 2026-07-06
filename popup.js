@@ -2,7 +2,6 @@ const statusEl = document.querySelector("#status");
 const studyStatusEl = document.querySelector("#study-status");
 const startButton = document.querySelector("#start");
 const stopButton = document.querySelector("#stop");
-const refreshButton = document.querySelector("#refresh");
 
 function setStatusClass(className) {
   statusEl.className = `status ${className || ""}`.trim();
@@ -103,5 +102,4 @@ async function stopStudy() {
 
 startButton.addEventListener("click", startStudy);
 stopButton.addEventListener("click", stopStudy);
-refreshButton.addEventListener("click", checkStatus);
 checkStatus();

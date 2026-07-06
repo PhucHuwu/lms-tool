@@ -1,66 +1,90 @@
-# LMS Video Status Checker
+# LMS Assistant - Tự động phát video LMS PTIT
 
-Extension Chrome Manifest V3 để kiểm tra trạng thái phát video Plyr trên `https://lms.ptit.edu.vn/*`.
+LMS Assistant là tiện ích mở rộng cho Google Chrome hỗ trợ tự động phát video bài học trên trang [lms.ptit.edu.vn](https://lms.ptit.edu.vn/). Công cụ giúp theo dõi trạng thái video, tự mở bài chưa hoàn thành, phát video với tốc độ cao và chuyển sang bài tiếp theo khi LMS cập nhật tiến độ.
+
+## Chức năng chính
+
+- Tự động tìm video bài học trên LMS PTIT.
+- Hiển thị trạng thái video hiện tại: đang phát, tạm dừng, đã phát xong hoặc không tìm thấy video.
+- Tự động mở bài học chưa hoàn thành trong danh sách bài học.
+- Tự động phát video và ưu tiên tốc độ `4x`; nếu không được sẽ thử `2x`.
+- Tự động tắt tiếng video khi phát.
+- Tự động chuyển sang bài tiếp theo sau khi video kết thúc và LMS đã cập nhật tiến độ.
+- Tự mở các mục/chương chưa hoàn thành nếu danh sách bài học đang bị thu gọn.
+- Giữ màn hình không ngủ trong lúc chạy hỗ trợ phát bài học.
+- Tạm dừng tại các bài dạng `Câu hỏi ôn tập chương` để người dùng xử lý thủ công.
+- Giả lập trạng thái trang luôn hiển thị để hạn chế việc video bị dừng khi chuyển tab hoặc mất focus.
+
+## Yêu cầu
+
+- Trình duyệt Google Chrome hoặc trình duyệt nhân Chromium có hỗ trợ Chrome Extension Manifest V3.
+- Tài khoản LMS PTIT có quyền truy cập khóa học/video cần học.
+- Mã nguồn tiện ích này đã được tải về máy.
 
 ## Cài đặt
 
+Hiện tại dự án là Chrome Extension thuần, không cần cài `npm`, không cần build.
+
 1. Mở Chrome và truy cập `chrome://extensions/`.
-2. Bật `Developer mode`.
-3. Chọn `Load unpacked`.
-4. Chọn thư mục `D:\Project\Git\lms-tool`.
-5. Mở bài học trên LMS, bấm icon extension để xem trạng thái video.
+2. Bật `Developer mode` hoặc `Chế độ nhà phát triển` ở góc phải phía trên.
+3. Chọn `Load unpacked` hoặc `Tải tiện ích đã giải nén`.
+4. Chọn thư mục chứa dự án này, tức thư mục có file `manifest.json`.
+5. Sau khi cài xong, ghim tiện ích `LMS Video Status Checker` lên thanh công cụ nếu muốn sử dụng nhanh.
 
-## Trạng thái có thể đọc
+## Cách sử dụng
 
-- Đang phát, tạm dừng, đã phát xong.
-- Thời gian hiện tại và tổng thời lượng.
-- Phần trăm tiến độ.
-- Tốc độ phát.
-- Âm lượng hoặc tắt tiếng.
+1. Mở trang [lms.ptit.edu.vn](https://lms.ptit.edu.vn/) và đăng nhập tài khoản của bạn.
+2. Vào khóa học có video cần học.
+3. Mở popup tiện ích trên thanh công cụ Chrome.
+4. Bấm `Bắt đầu` để chạy hỗ trợ phát bài học.
+5. Tiện ích sẽ tự tìm bài chưa xem, mở bài, phát video, tắt tiếng và đặt tốc độ phát cao nhất có thể.
+6. Khi video kết thúc, tiện ích chờ LMS cập nhật tiến độ rồi chuyển sang bài tiếp theo.
+7. Bấm `Dừng` nếu muốn dừng quá trình tự động.
 
-## Chế Độ Hỗ Trợ Phát Bài Học
+## Trạng thái trong popup
 
-Nút `Bắt đầu` trong popup sẽ chạy hỗ trợ phát bài học trên UI hiện tại:
+- `Đang phát`: video trên tab hiện tại đang chạy.
+- `Đang tạm dừng`: video đã được tìm thấy nhưng đang dừng.
+- `Đã phát xong`: video hiện tại đã kết thúc.
+- `Không tìm thấy video trên tab hiện tại`: trang hiện tại chưa có video hoặc video chưa tải xong.
+- `Hãy mở trang lms.ptit.edu.vn`: tiện ích chỉ hoạt động trên LMS PTIT.
+- `Tải lại trang LMS rồi thử lại`: content script chưa được nạp, hãy reload trang LMS.
 
-- Tìm bài học đầu tiên chưa được tick trong sidebar.
-- Bỏ qua bài bị khóa với `aria-disabled="true"`.
-- Mở bài đó nếu bài chưa active.
-- Tìm video trực tiếp trong trang hoặc trong iframe H5P có thể truy cập được.
-- Đặt tốc độ video thành `4x` nếu trình phát cho phép; nếu không được thì tự chuyển sang `2x`.
-- Tắt tiếng video và đặt âm lượng về `0%` để tránh ồn trong lúc kiểm thử.
-- Phát video sau thao tác bấm nút của người dùng.
-- Khi video kết thúc, chờ LMS cập nhật tiến độ rồi chuyển sang bài chưa xem tiếp theo.
-- Dừng khi hết bài có thể mở, khi Chrome chặn phát video, hoặc khi bấm `Dừng`.
-- Khi gặp bài có tiêu đề `Câu hỏi ôn tập chương`, tool mở bài, cuộn tới nút `Bắt đầu làm bài`, rồi tạm dừng để xử lý thủ công.
-- Giữ máy/màn hình thức trong lúc chạy bằng `chrome.power.requestKeepAwake("display")` để giảm khả năng video bị dừng do hệ thống sleep.
-- Chạy `visibility-override.js` ở `document_start` trong main world và iframe để giảm trường hợp player tự pause khi tab/cửa sổ bị ẩn.
+## Lưu ý khi sử dụng
 
-Extension chỉ thao tác qua DOM/UI trên tab hiện tại, không gọi API riêng và không sửa trạng thái tiến độ trực tiếp.
+- Tiện ích chỉ chạy trên domain `https://lms.ptit.edu.vn/*`.
+- Nếu Chrome chặn tự động phát, hãy bấm Play trực tiếp trên video một lần rồi chạy lại tiện ích.
+- Với bài `Câu hỏi ôn tập chương`, tiện ích sẽ dừng lại để bạn làm thủ công.
+- Tốc độ phát phụ thuộc vào trình phát video/LMS. Nếu không đặt được `4x`, tiện ích sẽ thử `2x`; nếu vẫn không được sẽ dùng tốc độ hiện tại.
+- Không nên đóng tab LMS trong lúc tiện ích đang chạy.
+- Khi cập nhật mã nguồn tiện ích, hãy vào `chrome://extensions/` và bấm reload tiện ích để áp dụng thay đổi.
 
-## Giới Hạn Khi Tab Chạy Nền
+## Cấu trúc dự án
 
-Chrome có thể throttle timer, renderer, iframe hoặc media khi tab không active hoặc khi cửa sổ bị minimize. Extension đã override Page Visibility API ở mức trang, nhưng không thể đảm bảo ép video tiếp tục chạy trong mọi trường hợp nếu chính Chrome suspend renderer khi minimize.
-
-Khi cần kiểm thử background có kiểm soát, hãy chạy bằng Chrome test profile riêng với các flag phù hợp, ví dụ:
-
-```powershell
-chrome.exe --user-data-dir="C:\Temp\lms-test-profile" --disable-background-timer-throttling --disable-renderer-backgrounding --disable-backgrounding-occluded-windows --autoplay-policy=no-user-gesture-required
+```text
+.
+├── manifest.json            # Cấu hình Chrome Extension
+├── popup.html               # Giao diện popup
+├── popup.css                # Giao diện và màu sắc popup
+├── popup.js                 # Xử lý nút Bắt đầu/Dừng và hiển thị trạng thái
+├── content.js               # Logic tìm video, tự phát bài học và chuyển bài
+├── background.js            # Giữ màn hình không ngủ khi đang chạy
+└── visibility-override.js   # Giả lập trang luôn hiển thị/focus
 ```
 
-Trong kiểm thử ổn định nhất, nên để tab LMS là tab active trong một cửa sổ Chrome riêng.
+## Quyền của tiện ích
 
-## Cách Lấy Trạng Thái Bằng Code
+- `activeTab`: đọc tab LMS hiện tại để gửi lệnh kiểm tra/phát video.
+- `scripting`: hỗ trợ thao tác với nội dung trang LMS.
+- `power`: giữ màn hình không ngủ trong lúc chạy tự động.
+- `host_permissions` cho `https://lms.ptit.edu.vn/*`: chỉ cho phép tiện ích hoạt động trên LMS PTIT.
 
-Từ popup, extension gửi message `GET_LMS_VIDEO_STATUS` đến content script để lấy trạng thái hiện tại. Content script cũng gắn cờ nhanh trên HTML root:
+## Gỡ cài đặt
 
-```html
-<html data-lms-video-playing="true">
-```
+1. Mở `chrome://extensions/`.
+2. Tìm tiện ích `LMS Video Status Checker`.
+3. Chọn `Remove` hoặc `Xóa`.
 
-Mỗi lần trạng thái thay đổi, content script phát event:
+## Miễn trừ trách nhiệm
 
-```js
-window.addEventListener("lms-video-status", (event) => {
-  console.log(event.detail);
-});
-```
+Tiện ích được tạo nhằm hỗ trợ thao tác học video trên LMS PTIT. Người dùng tự chịu trách nhiệm khi sử dụng và cần tuân thủ quy định học tập, kiểm tra, đánh giá của nhà trường và từng môn học.
